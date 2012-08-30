@@ -253,15 +253,11 @@ module TreasureData
       raise "invalid output_format:" if @output_format == nil
 
       # 出力
-      #@output = $stdout
-      #if opt[:try_run] then
-      #  @output = $stderr
-      #end
       @output_writer = SplittableWriter.new(
         opt[:try_run] ? $stderr : $stdout,
         opt[:gzip],
-        opt[:output_dir],
-        opt[:output_filename],
+        opt[:try_run] ? nil : opt[:output_dir],
+        opt[:try_run] ? nil : opt[:output_filename],
         opt[:output_limit_size],
         )
 
