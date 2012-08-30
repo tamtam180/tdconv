@@ -19,7 +19,6 @@ module TreasureData
     end
   end
 
-
   # GZIPの場合はデフォで約4KごとにFlushされるので、それくらいの誤差は許容する方向で。
   # ちまちまFlush(FULL|SYNC)してもいいけど、サイズ大きくなってひどいことになるのでやらない。
   class SplittableWriter
@@ -62,7 +61,6 @@ module TreasureData
 
     def write(str)
       # 書き込もうとした時にサイズ超過している場合はローテーションする
-      #pos = tell()
       if @wrote_count == -1 || @wrote_count > @limit then
         rotate()
       end
@@ -71,15 +69,6 @@ module TreasureData
       return len
     end
 
-    def tell()
-      p @current_io
-      if @current_io == nil then
-        return -1
-      else
-        return @current_io.tell
-      end
-    end
-   
     def close()
       if @inner_writer != nil then
         @inner_writer.close
@@ -336,12 +325,11 @@ if __FILE__ == $0 then
     :detail_output => false,
   }
   
-  # TODO: ファイル出力と分割出力を追加する
-  # TODO: stdout
   # TODO: try-run
-  # TODO: gzip / gzip処理はパイプでつなげた方が高速だけど、圧縮後のサイズを見ながら処理できないので。
   # TODO: -verbose
   # TODO: regexとぱたーん
+  # TODO: ファイル入力
+  # TODO: Version定義
   op = OptionParser.new
   op.on("--input-format={tsv|json|regex}", '入力形式'){|v| $OPTS[:input_format] = v}
   op.on("--output-format={json|msgpack}", '出力形式'){|v| $OPTS[:output_format] = v}
