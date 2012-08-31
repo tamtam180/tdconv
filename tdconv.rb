@@ -356,6 +356,7 @@ if __FILE__ == $0 then
   $OPTS = {
     :input_format => 'json',
     :output_format => 'msgpack',
+    :keys => nil,
     :types => nil,
     :time_value => nil,
     :time_key => nil,
@@ -380,6 +381,7 @@ if __FILE__ == $0 then
   op = OptionParser.new
   op.on("--input-format={csv|tsv|json|regex}", '入力形式', '※csvもtsvも単純な書式しかサポートしない'){|v| $OPTS[:input_format] = v}
   op.on("--output-format={json|msgpack}", '出力形式'){|v| $OPTS[:output_format] = v}
+  op.on("--keys=KEY[,KEY]*", '各項目の名前'){|v| $OPTS[:keys] = v}
   op.on('--types=TYPES', 
         'TYPES=[TYPE]+', 
         'TYPE=string|int|integer|long|bool|boolean|float|double|time(TIME_FORMAT)', 
