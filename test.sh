@@ -69,7 +69,7 @@ run_test() {
     if [ $? -ne 0 ]; then
       echo "  -> FAIL(diff-stderr)"
       $CAT -A "$DIFF_OUT"
-      return 2
+      return 3
     fi
   fi
 
