@@ -344,9 +344,9 @@ if __FILE__ == $0 then
   op.on('-n', '--try-run', '--dry-run', '1行だけ処理をして結果はSTDERRへ出力'){|v| $OPTS[:try_run] = true}
   op.on('-z', '--gzip', '出力をGZIP処理する'){|v| $OPTS[:gzip] = true}
   op.on('-c', '--stdout', '出力をSTDOUTに出力する'){|v| $OPTS[:stdout] = true}
-  op.on('-d', '--output-dir', 'ファイルに出力する場合の出力先ディレクトリ', '省略時はカレントディレクトリ'){|v| $OPTS[:output_dir] = v}
-  op.on('-o', '--output-filename', 'ファイルに出力する場合のファイル名'){|v| $OPTS[:output_filename] = v}
-  op.on('-l', '--limit', '分割する場合のサイズ.単位はMbyte', '省略時は分割しない'){|v| $OPTS[:output_limit_size] = v.to_i * 1024 * 1024}
+  op.on('-d', '--output-dir=DIR', 'ファイルに出力する場合の出力先ディレクトリ', '省略時はカレントディレクトリ'){|v| $OPTS[:output_dir] = v}
+  op.on('-o', '--output-filename=FILE', 'ファイルに出力する場合のファイル名'){|v| $OPTS[:output_filename] = v}
+  op.on('-l', '--limit=NUM', '分割する場合のサイズ.単位はMbyte', '省略時は分割しない'){|v| $OPTS[:output_limit_size] = v.to_i * 1024 * 1024}
   op.on('-v', '--verbose', '処理の詳細表示'){|v| $OPTS[:detail_output] = true}
   op.parse!(ARGV)
 
