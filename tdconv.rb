@@ -1,5 +1,8 @@
 # coding: utf-8
 
+# ファイル入力はしない方向で
+# 先頭をスキップする処理やヘッダ処理の扱いを各ファイル毎にしないといけないの面倒
+
 require 'rubygems'
 require 'optparse'
 require 'json'
@@ -81,7 +84,6 @@ module TreasureData
 
     class LineParser
       def initialize(opt)
-        #@opt = opt
       end
       def opt_parse(opt, converter=nil)
       end
@@ -90,12 +92,14 @@ module TreasureData
       end
     end
 
-    class TSVLineParser < LineParser
+    class RegexLineParser < LineParser
       def initialize(opt)
         super(opt)
       end
       def opt_parse(opt, converter=nil)
         super(opt, converter)
+        # 正規表現のパターン
+        @pattern = opt[:pattern]
         # キーと型の情報を拾ってくる
         keys = opt[:keys].to_s.split(',')
         types = opt[:types].to_s.split(',')
@@ -104,7 +108,7 @@ module TreasureData
           header = converter.input.gets.chomp
           # 先頭が#でコメントとみなす形式があるのでその対応
           header = header[1..-1] if header.start_with?('#')
-          keys = header.split(/\t/)
+          keys = header.split(@pattern)
           #opt[:skip_rows] += 1 実際に読んでるのでSKIPもくそもない
         end
         if keys.empty? || types.empty? || keys.length != types.length then
@@ -131,7 +135,7 @@ module TreasureData
         @item_length = @columns.length
       end
       def parse(line)
-        items = line.chomp.split(/\t/)
+        items = line.chomp.split(@pattern)
         if items.length == @item_length then
           record = {}
           items.each_with_index do | item, index |
@@ -170,10 +174,13 @@ module TreasureData
       end
     end
 
-    class RegexLineParser < LineParser
-      # 実装する元気がないぞよ.
-      # Regexをきちんと実装してそのサブクラスとしてTSVを実装した方が良さそう
+    class TSVLineParser < RegexLineParser
+      def initialize(opt)
+        opt[:pattern] = /\t/
+        super(opt)
+      end
     end
+
 
     class JSONLineParser < LineParser
       def initialize(opt)
@@ -319,12 +326,12 @@ if __FILE__ == $0 then
     :output_filename => nil,
     :output_limit_size => -1, #1024 * 1024 * 10,
     :detail_output => false,
+    :regex_pattern => nil,
   }
   
   # TODO: try-run
   # TODO: -verbose
   # TODO: regexとぱたーん
-  # TODO: ファイル入力
   # TODO: Version定義
   op = OptionParser.new
   op.on("--input-format={tsv|json|regex}", '入力形式'){|v| $OPTS[:input_format] = v}
@@ -341,6 +348,7 @@ if __FILE__ == $0 then
   op.on('--exclude-keys=KEY[,KEY]*', '除外する項目'){|v| $OPTS[:exclude_keys] = v}
   op.on('--use-header', 'TSVの場合にヘッダ行を処理して属性名として使用する'){|v| $OPTS[:use_header] = true}
   op.on('--skip-rows=NUM', '最初の行を指定した数だけ飛ばす'){|v| $OPTS[:skip_rows] = v.to_i}
+  op.on('--pattern=REGEX-PATTERN', 'regex形式のパターン指定。', '入力形式がregexの時に有効'){|v| $OPTS[:regex_pattern] = v}
   op.on('-n', '--try-run', '--dry-run', '1行だけ処理をして結果はSTDERRへ出力'){|v| $OPTS[:try_run] = true}
   op.on('-z', '--gzip', '出力をGZIP処理する'){|v| $OPTS[:gzip] = true}
   op.on('-c', '--stdout', '出力をSTDOUTに出力する'){|v| $OPTS[:stdout] = true}
