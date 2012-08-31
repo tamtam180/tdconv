@@ -181,6 +181,12 @@ module TreasureData
       end
     end
 
+    class CSVLineParser < RegexLineParser
+      def initialize(opt)
+        opt[:pattern] = /\,/
+        super(opt)
+      end
+    end
 
     class JSONLineParser < LineParser
       def initialize(opt)
@@ -221,6 +227,7 @@ module TreasureData
     def initialize(opt)
       # パーサー定義
       @parsers = {
+        :csv => CSVLineParser,
         :tsv => TSVLineParser,
         :json => JSONLineParser,
         :regex => RegexLineParser,
@@ -334,7 +341,7 @@ if __FILE__ == $0 then
   # TODO: regexとぱたーん
   # TODO: Version定義
   op = OptionParser.new
-  op.on("--input-format={tsv|json|regex}", '入力形式'){|v| $OPTS[:input_format] = v}
+  op.on("--input-format={csv|tsv|json|regex}", '入力形式', '※csvもtsvも単純な書式しかサポートしない'){|v| $OPTS[:input_format] = v}
   op.on("--output-format={json|msgpack}", '出力形式'){|v| $OPTS[:output_format] = v}
   op.on('--types=TYPES', 
         'TYPES=[TYPE]+', 
@@ -346,7 +353,7 @@ if __FILE__ == $0 then
   op.on('--tk=KEY', '--time-key=KEY', 'time属性として使うキー'){|v| $OPTS[:time_key] = v}
   op.on('--time-format=FORMAT', 'time-valueの書式。指定しないとUNIXTIMEとして扱う'){|v| $OPTS[:time_format] = v}
   op.on('--exclude-keys=KEY[,KEY]*', '除外する項目'){|v| $OPTS[:exclude_keys] = v}
-  op.on('--use-header', 'TSVの場合にヘッダ行を処理して属性名として使用する'){|v| $OPTS[:use_header] = true}
+  op.on('--use-header', 'CSVかTSVの場合にヘッダ行を処理して属性名として使用する'){|v| $OPTS[:use_header] = true}
   op.on('--skip-rows=NUM', '最初の行を指定した数だけ飛ばす'){|v| $OPTS[:skip_rows] = v.to_i}
   op.on('--pattern=REGEX-PATTERN', 'regex形式のパターン指定。', '入力形式がregexの時に有効'){|v| $OPTS[:regex_pattern] = v}
   op.on('-n', '--try-run', '--dry-run', '1行だけ処理をして結果はSTDERRへ出力'){|v| $OPTS[:try_run] = true}
