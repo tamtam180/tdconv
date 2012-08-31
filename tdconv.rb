@@ -96,21 +96,24 @@ module TreasureData
       def initialize(opt)
         super(opt)
       end
+      def get_keys(opt, converter)
+        if opt[:regex_pattern] != nil && !opt[:regex_pattern].names.empty? then
+          keys = opt[:regex_pattern].names
+        else
+          keys = opt[:keys].to_s.split(',')
+        end
+        return keys
+      end
+      def get_types(opt)
+        return opt[:types].to_s.split(',')
+      end
       def opt_parse(opt, converter=nil)
         super(opt, converter)
         # 正規表現のパターン
         @pattern = opt[:pattern]
         # キーと型の情報を拾ってくる
-        keys = opt[:keys].to_s.split(',')
-        types = opt[:types].to_s.split(',')
-        # 1行目をカラム情報として使う場合
-        if opt[:use_header] then
-          header = converter.input.gets.chomp
-          # 先頭が#でコメントとみなす形式があるのでその対応
-          header = header[1..-1] if header.start_with?('#')
-          keys = header.split(@pattern)
-          #opt[:skip_rows] += 1 実際に読んでるのでSKIPもくそもない
-        end
+        keys = get_keys(opt, converter)
+        types = get_types(opt)
         if keys.empty? || types.empty? || keys.length != types.length then
           raise "keys or types is invalid."
         end
@@ -134,8 +137,17 @@ module TreasureData
         end
         @item_length = @columns.length
       end
+      def split(line)
+        md = @pattern.match(line.chomp)
+        if md then
+          return md.captures
+        else
+          # マッチしない場合はエラーレコードとしてCallbackする
+          # TODO: 後で..
+        end
+      end
       def parse(line)
-        items = line.chomp.split(@pattern)
+        items = split(line)
         if items.length == @item_length then
           record = {}
           items.each_with_index do | item, index |
@@ -174,17 +186,42 @@ module TreasureData
       end
     end
 
-    class TSVLineParser < RegexLineParser
+    class XSVLineParser < RegexLineParser
       def initialize(opt)
-        opt[:pattern] = /\t/
         super(opt)
+        opt[:regex_pattern] = nil
+      end
+      def get_keys(opt, converter)
+        keys = super(opt, converter)
+        # 1行目をカラム情報として使う場合
+        if opt[:use_header] then
+          header = converter.input.gets.chomp
+          # 先頭が#でコメントとみなす形式があるのでその対応
+          header = header[1..-1] if header.start_with?('#')
+          keys = split(header)
+        end
+        return keys
+      end
+      def split(line)
+        raise "you must overwrite split method."
       end
     end
 
-    class CSVLineParser < RegexLineParser
+    class TSVLineParser < XSVLineParser
       def initialize(opt)
-        opt[:pattern] = /\,/
         super(opt)
+      end
+      def split(line)
+        return line.chomp.split(/\t/)
+      end
+    end
+
+    class CSVLineParser < XSVLineParser
+      def initialize(opt)
+        super(opt)
+      end
+      def split(line)
+        return line.chomp.split(/\,/)
       end
     end
 
@@ -355,7 +392,7 @@ if __FILE__ == $0 then
   op.on('--exclude-keys=KEY[,KEY]*', '除外する項目'){|v| $OPTS[:exclude_keys] = v}
   op.on('--use-header', 'CSVかTSVの場合にヘッダ行を処理して属性名として使用する'){|v| $OPTS[:use_header] = true}
   op.on('--skip-rows=NUM', '最初の行を指定した数だけ飛ばす'){|v| $OPTS[:skip_rows] = v.to_i}
-  op.on('--pattern=REGEX-PATTERN', 'regex形式のパターン指定。', '入力形式がregexの時に有効'){|v| $OPTS[:regex_pattern] = v}
+  op.on('--pattern=REGEX-PATTERN', 'regex形式のパターン指定。', '入力形式がregexの時に有効'){|v| $OPTS[:regex_pattern] = Regexp.new(v)}
   op.on('-n', '--try-run', '--dry-run', '1行だけ処理をして結果はSTDERRへ出力'){|v| $OPTS[:try_run] = true}
   op.on('-z', '--gzip', '出力をGZIP処理する'){|v| $OPTS[:gzip] = true}
   op.on('-c', '--stdout', '出力をSTDOUTに出力する'){|v| $OPTS[:stdout] = true}
