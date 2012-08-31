@@ -33,13 +33,13 @@ run_test() {
 
   if [ ! -e "$in_file" ]; then
     echo "input-file not found: $in_file"
-	return 10
+    return 10
   fi
 
   # NegativeTestの場合は結果が無くても良い
   if [ $status_code -eq 0 ] && [ ! -e "$out_file" ] && [ ! -e "$err_file" ]; then
     echo "out-file and err-file not found."
-	return 11
+    return 11
   fi
 
   # 実行する
@@ -49,9 +49,9 @@ run_test() {
   # ステータスコードの検証
   if [ $status_code -ne $exit_code ]; then
     echo "  -> FAIL(status-code)"
-	echo "     actual  =${exit_code}"
-	echo "     expected=${status_code}"
-	return 1
+    echo "     actual  =${exit_code}"
+    echo "     expected=${status_code}"
+    return 1
   fi
 
   # 結果の比較
@@ -59,8 +59,8 @@ run_test() {
     $DIFF "$out_file" "$TMP_OUT" > $DIFF_OUT
     if [ $? -ne 0 ]; then
       echo "  -> FAIL(diff-stdout)"
-	  $CAT -A "$DIFF_OUT"
-	  return 2
+      $CAT -A "$DIFF_OUT"
+      return 2
     fi
   fi
 
@@ -68,8 +68,8 @@ run_test() {
     $DIFF "$err_file" "$TMP_ERR" > $DIFF_OUT
     if [ $? -ne 0 ]; then
       echo "  -> FAIL(diff-stderr)"
-	  $CAT -A "$DIFF_OUT"
-	  return 2
+      $CAT -A "$DIFF_OUT"
+      return 2
     fi
   fi
 
