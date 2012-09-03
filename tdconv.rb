@@ -136,7 +136,7 @@ module TreasureData
       def opt_parse(opt, converter=nil)
         super(opt, converter)
         # 正規表現のパターン
-        @pattern = opt[:pattern]
+        @pattern = opt[:regex_pattern]
         # キーと型の情報を拾ってくる
         keys = get_keys(opt, converter)
         types = get_types(opt)
@@ -174,6 +174,7 @@ module TreasureData
         else
           # マッチしない場合はエラーレコードとしてCallbackする
           # TODO: 後で..
+          raise "cannot match :pattern=#{@pattern} line=#{line}"
         end
       end
       def parse(line)

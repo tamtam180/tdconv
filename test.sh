@@ -30,6 +30,7 @@ run_test() {
   if [ "$test_desc" != "" ]; then
     echo "   desc: ${test_desc}"
   fi
+  echo "   args: ${args}"
 
   if [ ! -e "$in_file" ]; then
     echo "input-file not found: $in_file"
@@ -96,9 +97,11 @@ run_test "type_test5" "timeフォーマット、デフォルト書換" 0 '--inpu
 
 # JSONのテスト
 # REGEXのテスト
+run_test "regex_test1" "" 0 --input-format=regex --keys=x,y,z --pattern="(\d+),(\d+),(\d+)" --types=int,int,int --output-format=json
+
 # TIMEオプション指定
-run_test "time_test1" "tsv" 0 --input-format=tsv --use-header --types=string,int --time-value=1347206460 --output-format=json
-run_test "time_test2" "tsv" 0 --input-format=tsv --use-header --types=string,int --time-value=2012/9/10_01:01:00 --time-format=%Y/%m/%d_%T --output-format=json
+#run_test "time_test1" "tsv" 0 --input-format=tsv --use-header --types=string,int --time-value=1347206460 --output-format=json
+#run_test "time_test2" "tsv" 0 --input-format=tsv --use-header --types=string,int --time-value=2012/9/10_01:01:00 --time-format=%Y/%m/%d_%T --output-format=json
 
 # 出力形式のテスト
 
