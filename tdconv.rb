@@ -86,6 +86,32 @@ module TreasureData
       def initialize(opt)
       end
       def opt_parse(opt, converter=nil)
+        @time_format = opt[:time_format] if opt[:time_format] != nil
+        if opt[:time_value] != nil then
+          if @time_format == nil then
+            @time_value = opt[:time_value].to_i
+          else
+            @time_value = Time.strptime(opt[:time_value], @time_format).to_i
+          end
+        end
+        @time_key = opt[:time_key] if opt[:time_key] != nil
+      end
+      def append_time(obj)
+        # オプションに沿って処理を
+        if @time_value != nil then
+          obj['time'] = @time_value
+        elsif @time_key != nil then
+          # キーの存在チェック
+          if obj[@time_key] == nil then
+            raise "time_key not found in record: time-key=%s, reccord=%s" % [@time_key, obj]
+          end
+          if @time_format == nil then
+            obj['time'] = obj[@time_key].to_i
+          else
+            obj['time'] = Time.strptime(obj[@time_key], @time_format).to_i
+          end
+        end
+        return obj
       end
       def parse(line)
         raise "you must override parse method!!"
@@ -182,6 +208,7 @@ module TreasureData
             end
             record[key] = value
           end
+          append_time(record)
           return record
         else
           # record-skipしたほうがいいかな
@@ -235,32 +262,10 @@ module TreasureData
       end
       def opt_parse(opt, converter=nil)
         super(opt, converter)
-        @time_format = opt[:time_format] if opt[:time_format] != nil
-        if opt[:time_value] != nil then
-          if @time_format == nil then
-            @time_value = opt[:time_value].to_i
-          else
-            @time_value = Time.strptime(opt[:time_value], @time_format).to_i
-          end
-        end
-        @time_key = opt[:time_key] if opt[:time_key] != nil
       end
       def parse(line)
         json = JSON.parse(line)
-        # オプションに沿って処理を
-        if @time_value != nil then
-          json['time'] = @time_value
-        elsif @time_key != nil then
-          # キーの存在チェック
-          if json[@time_key] == nil then
-            raise "time_key not found in record: time-key=%s, reccord=%s" % [@time_key, json]
-          end
-          if @time_format == nil then
-            json['time'] = json[@time_key].to_i
-          else
-            json['time'] = Time.strptime(json[@time_key], @time_format).to_i
-          end
-        end
+        append_time(json)
         return json
       end
     end
@@ -341,8 +346,6 @@ module TreasureData
         end
         msg = @output_format.call(record)
         # どこに出力？
-        #@output.write msg
-        #@output.write @output_suffix_format if @output_suffix_format != nil
         @output_writer.write msg
         @output_writer.write @output_suffix_format if @output_suffix_format != nil
       end
