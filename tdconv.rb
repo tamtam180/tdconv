@@ -378,7 +378,7 @@ if __FILE__ == $0 then
     :regex_pattern => nil,
     :default_time_format => '%Y/%m/%d %T',
   }
-  
+
   # TODO: try-run
   # TODO: -verbose
   # TODO: regexとぱたーん

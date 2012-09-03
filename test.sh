@@ -20,7 +20,7 @@ run_test() {
   test_name=$1; shift 1
   test_desc=$1; shift 1
   status_code=$1; shift 1
-  args=$*
+  args="$*"
 
   in_file="${TEST_DATA_DIR}/${test_name}_in.txt"
   out_file="${TEST_DATA_DIR}/${test_name}_out.txt"
@@ -88,8 +88,9 @@ run_test "tsv_test5" "keysとuse-headerではheaderが優先" 0 --input-format=t
 run_test "type_test1" "time以外" 0 --input-format=tsv --use-header --types=string,int,integer,long,bool,boolean,float,double --output-format=json 
 run_test "type_test2" "boolバリエーション" 0 --input-format=tsv --use-header --types=bool,bool,bool,bool,bool,bool --output-format=json 
 run_test "type_test3" "timeフォーマット指定なし" 0 --input-format=tsv --use-header --types=time --output-format=json 
-run_test "type_test4" "timeフォーマット指定" 0 "--input-format=tsv --use-header --types=time[%Y-%m-%d],time[%Y-%m-%d %T],time --output-format=json"
-run_test "type_test5" "timeフォーマット、デフォルト書換" 0 "--input-format=tsv --use-header --types=time --defualt-time-format='%F %T' --output-format=json"
+run_test "type_test4" "timeフォーマット指定" 0 "--input-format=tsv --use-header --types=time[%Y-%m-%d],time[%Y-%m-%d_%T],time --output-format=json"
+#run_test "type_test5" "timeフォーマット、デフォルト書換" 0 '--input-format=tsv --use-header --types=time --default-time-format="%F %T" --output-format=json'
+run_test "type_test5" "timeフォーマット、デフォルト書換" 0 '--input-format=tsv --use-header --types=time --default-time-format=%F_%T --output-format=json'
 
 # JSONのテスト
 # REGEXのテスト
