@@ -98,6 +98,8 @@ run_test "type_test5" "timeフォーマット、デフォルト書換" 0 '--inpu
 # JSONのテスト
 # REGEXのテスト
 run_test "regex_test1" "" 0 --input-format=regex --keys=x,y,z --pattern="(\d+),(\d+),(\d+)" --types=int,int,int --output-format=json
+run_test "regex_test2" "" 0 --input-format=regex --pattern="(?<xx>\d+),(?<yy>\d+),(?<zz>\d+)" --types=int,int,int --output-format=json
+run_test "regex_test3" "" 0 --input-format=regex --keys=x,y,z --pattern="(?<xx>\d+),(?<yy>\d+),(?<zz>\d+)" --types=int,int,int --output-format=json
 
 # TIMEオプション指定
 #run_test "time_test1" "tsv" 0 --input-format=tsv --use-header --types=string,int --time-value=1347206460 --output-format=json

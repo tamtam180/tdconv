@@ -123,10 +123,9 @@ module TreasureData
         super(opt)
       end
       def get_keys(opt, converter)
-        if opt[:regex_pattern] != nil && !opt[:regex_pattern].names.empty? then
+        keys = opt[:keys].to_s.split(',')
+        if keys.empty? && opt[:regex_pattern] != nil && !opt[:regex_pattern].names.empty? then
           keys = opt[:regex_pattern].names
-        else
-          keys = opt[:keys].to_s.split(',')
         end
         return keys
       end
