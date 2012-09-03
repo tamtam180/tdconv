@@ -128,6 +128,10 @@ run_test "time_test5" "regex" 0 --input-format=regex --keys=x,y,z --pattern="(\d
 run_test "time_test6" "regex" 0 --input-format=regex --keys=x,y,z --pattern="(\d+),(\d+),(\d+)" --types=int,int,int --time-value=2012/9/10_01:01:00 --time-format=%Y/%m/%d_%T --output-format=json
 run_test "time_test7" "regex" 0 --input-format=regex --keys=x,y,z --pattern="(\d+),(\d+),(\d+)" --types=int,int,int --time-key=x --output-format=json
 run_test "time_test8" "regex" 0 --input-format=regex --keys=x,y,z --pattern="pos=\((.+?),(\d+),(\d+)\)" --types=string,int,int --time-key=x --time-format=%Y/%m/%d_%T --output-format=json
+run_test "time_test9" "json" 0 --input-format=json --time-value=1347206460 --output-format=json
+run_test "time_test10" "json" 0 --input-format=json --time-value=2012/9/10_01:01:00 --time-format=%Y/%m/%d_%T --output-format=json
+run_test "time_test11" "json" 0 --input-format=json --time-key=i1 --output-format=json
+run_test "time_test12" "json" 0 --input-format=json --time-key=s2 --exclude-keys=s2 --time-format=%Y/%m/%d_%T --output-format=json
 
 # 出力形式のテスト
 
