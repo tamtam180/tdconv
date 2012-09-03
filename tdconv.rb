@@ -396,7 +396,7 @@ if __FILE__ == $0 then
         'TIME_FORMAT=Time.parseの書式'){|v| 
           $OPTS[:types] = v
       }
-  op.on('--tv=UNIXTIME|STRIING', '--time-value=UNIXTIME|STRING', 'time属性の値.UNIXTIMEを指定', '別途--time-formatを使えば任意の書式を指定可能'){|v| $OPTS[:time_value] = v.to_i}
+  op.on('--tv=UNIXTIME|STRIING', '--time-value=UNIXTIME|STRING', 'time属性の値.UNIXTIMEを指定', '別途--time-formatを使えば任意の書式を指定可能'){|v| $OPTS[:time_value] = v}
   op.on('--tk=KEY', '--time-key=KEY', 'time属性として使うキー'){|v| $OPTS[:time_key] = v}
   op.on('--time-format=FORMAT', 'time-valueの書式。指定しないとUNIXTIMEとして扱う'){|v| $OPTS[:time_format] = v}
   op.on('--exclude-keys=KEY[,KEY]*', '除外する項目'){|v| $OPTS[:exclude_keys] = v}
