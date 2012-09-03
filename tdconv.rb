@@ -125,13 +125,17 @@ module TreasureData
             :type => type,
           }
           unless [ 'string', 'bool', 'boolean', 'int', 'integer', 'long', 'number', 'float', 'double' ].include?(type) then
-            # time型の場合はtime(FORMAT)の書式なのでFORMATを抜き出す
+            # time型の場合はtime[FORMAT]の書式なのでFORMATを抜き出す
             if type.start_with?('time') then
-              if /time\((.+?)\)/ =~ time then
+              column[:type] = 'time'
+              if /time\[(.+?)\]/ =~ type then
                 column[:format] = $1
+              else
+                column[:format] = opt[:default_time_format]
               end
+            else
+              raise "type\"#{type}\" is invalid."
             end
-            raise "type\"#{type}\" is invalid."
           end
           @columns << column
         end
@@ -372,6 +376,7 @@ if __FILE__ == $0 then
     :output_limit_size => -1, #1024 * 1024 * 10,
     :detail_output => false,
     :regex_pattern => nil,
+    :default_time_format => '%Y/%m/%d %T',
   }
   
   # TODO: try-run
@@ -384,7 +389,7 @@ if __FILE__ == $0 then
   op.on("--keys=KEY[,KEY]*", '各項目の名前'){|v| $OPTS[:keys] = v}
   op.on('--types=TYPES', 
         'TYPES=[TYPE]+', 
-        'TYPE=string|int|integer|long|bool|boolean|float|double|time(TIME_FORMAT)', 
+        'TYPE=string|int|integer|long|bool|boolean|float|double|time[TIME_FORMAT]', 
         'TIME_FORMAT=Time.parseの書式'){|v| 
           $OPTS[:types] = v
       }
@@ -395,6 +400,7 @@ if __FILE__ == $0 then
   op.on('--use-header', 'CSVかTSVの場合にヘッダ行を処理して属性名として使用する'){|v| $OPTS[:use_header] = true}
   op.on('--skip-rows=NUM', '最初の行を指定した数だけ飛ばす'){|v| $OPTS[:skip_rows] = v.to_i}
   op.on('--pattern=REGEX-PATTERN', 'regex形式のパターン指定。', '入力形式がregexの時に有効'){|v| $OPTS[:regex_pattern] = Regexp.new(v)}
+  op.on('--default_time_format=TIME_FORMAT', 'time型の書式を省略した場合の書式', 'デフォは"%Y/%m/%d %T"'){|v| $OPTS[:default_time_format] = Regexp.new(v)}
   op.on('-n', '--try-run', '--dry-run', '1行だけ処理をして結果はSTDERRへ出力'){|v| $OPTS[:try_run] = true}
   op.on('-z', '--gzip', '出力をGZIP処理する'){|v| $OPTS[:gzip] = true}
   op.on('-c', '--stdout', '出力をSTDOUTに出力する'){|v| $OPTS[:stdout] = true}

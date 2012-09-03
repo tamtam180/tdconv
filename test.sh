@@ -84,6 +84,12 @@ run_test "tsv_test2" "keys指定無し" 1 --input-format=tsv --types=int,int,int
 run_test "tsv_test3" "intの変換が0になる" 0 --input-format=tsv --keys=a,b,c --types=int,int,int --output-format=json 
 run_test "tsv_test4" "skip-rowsのテスト" 0 --input-format=tsv --skip-rows=1 --keys=a,b,c --types=int,int,int --output-format=json 
 run_test "tsv_test5" "keysとuse-headerではheaderが優先" 0 --input-format=tsv --use-header --keys=a,b,c --types=int,int,int --output-format=json 
+# 型チェック
+run_test "type_test1" "time以外" 0 --input-format=tsv --use-header --types=string,int,integer,long,bool,boolean,float,double --output-format=json 
+run_test "type_test2" "boolバリエーション" 0 --input-format=tsv --use-header --types=bool,bool,bool,bool,bool,bool --output-format=json 
+run_test "type_test3" "timeフォーマット指定なし" 0 --input-format=tsv --use-header --types=time --output-format=json 
+run_test "type_test4" "timeフォーマット指定" 0 "--input-format=tsv --use-header --types=time[%Y-%m-%d],time[%Y-%m-%d %T],time --output-format=json"
+run_test "type_test5" "timeフォーマット、デフォルト書換" 0 "--input-format=tsv --use-header --types=time --defualt-time-format='%F %T' --output-format=json"
 
 # JSONのテスト
 # REGEXのテスト
