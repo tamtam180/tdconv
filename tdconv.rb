@@ -24,7 +24,28 @@ module TreasureData
 
   # GZIPの場合はデフォで約4KごとにFlushされるので、それくらいの誤差は許容する方向で。
   # ちまちまFlush(FULL|SYNC)してもいいけど、サイズ大きくなってひどいことになるのでやらない。
+  # SplittableWriter -> GzipWriter -> WrapWriter -> STDOut
+  #                  --------------->            -> STDErr
+  #                                              -> File
+  #                                 ↑WroteLen
+  #                  ↑writeLen,writeCount
   class SplittableWriter
+
+    class WrapWriter
+      def initialize(io)
+        @io = io
+        @len = 0
+      end
+      def write(str)
+        len = @io.write(str)
+        @len += len
+        return len
+      end
+      def close()
+        @io.close
+      end
+      attr_reader :len
+    end
 
     # いろいろひどいので後で直す。後で・・・
     def initialize(io=$stdout, gzip=false, output_dir=nil, filename=nil, limit=10485760)
@@ -33,26 +54,34 @@ module TreasureData
       @output_dir = output_dir
       @filename = filename
       @file_count = 0
-      @wrote_count = -1
+      @write_count = 0
+      @write_len = 0
+      @wrote_len = 0
       @limit = limit
+    end
+
+    def write2file?()
+      return @filename != nil
     end
 
     def rotate()
 
-      @wrote_count = 0
+      @write_count = 0
+      @write_len = 0
+      @wrote_len = 0
       @file_count += 1
 
       # ファイルかどうか？
-      if @filename == nil then
-        @current_io = @io
-      else
+      if write2file?() then
         FileUtils.mkdir_p(@output_dir.to_s) if not File.exists?(@output_dir.to_s)
         name = File.basename(@filename.to_s, '.*') + "." + @file_count.to_s + File.extname(@filename.to_s)
         name += ".gz" if @gzip
-
-        @inner_writer.close if @inner_writer != nil
+        @inner_writer.close()
         @current_io = open(File.join(@output_dir.to_s, name), "w")
+      else
+        @current_io = @io
       end
+      @current_io = WrapWriter.new(@current_io)
 
       if @gzip then
         @inner_writer = Zlib::GzipWriter.wrap(@current_io)
@@ -64,16 +93,20 @@ module TreasureData
 
     def write(str)
       # 書き込もうとした時にサイズ超過している場合はローテーションする
-      if @wrote_count == -1 || @wrote_count > @limit then
+      if @write_count == 0 || (write2file?() && @wrote_len > @limit) then
         rotate()
       end
+      # 書き込み
       len = @inner_writer.write(str)
-      @wrote_count += len
+      # 状態更新
+      @write_count += 1
+      @write_len += len
+      @wrote_count = @current_io.len
       return len
     end
 
     def close()
-      if @inner_writer != nil then
+      if @inner_writer != nil && (@gzip || write2file?()) then
         @inner_writer.close
       end
     end
@@ -350,6 +383,8 @@ module TreasureData
         @output_writer.write @output_suffix_format if @output_suffix_format != nil
       end
 
+      @output_writer.close()
+
     end
 
     attr_reader :input
@@ -386,6 +421,7 @@ if __FILE__ == $0 then
   # TODO: -verbose
   # TODO: regexとぱたーん
   # TODO: Version定義
+  # TODO: TSV出力をつけてHiveでも使えるようにする
   op = OptionParser.new
   op.on("--input-format={csv|tsv|json|regex}", '入力形式', '※csvもtsvも単純な書式しかサポートしない'){|v| $OPTS[:input_format] = v}
   op.on("--output-format={json|msgpack}", '出力形式'){|v| $OPTS[:output_format] = v}

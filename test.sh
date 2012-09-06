@@ -134,6 +134,9 @@ run_test "time_test11" "json" 0 --input-format=json --time-key=i1 --output-forma
 run_test "time_test12" "json" 0 --input-format=json --time-key=s2 --exclude-keys=s2 --time-format=%Y/%m/%d_%T --output-format=json
 
 # 出力形式のテスト
+## MSGPACk出力
+## 分割出力
+## GZIP出力
 
 
 
